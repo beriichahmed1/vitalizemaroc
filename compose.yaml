@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: vitalizemaroc
+      POSTGRES_USER: vitalize_dev
+      POSTGRES_PASSWORD: local-dev-only
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vitalize_dev -d vitalizemaroc"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - vitalize_pgdata:/var/lib/postgresql/data
+
+  # The API also runs the order worker (RUN_WORKER_IN_API=true): upsell expiry, Sheets and CAPI delivery.
+  backend:
+    build: ./backend
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgres://vitalize_dev:local-dev-only@postgres:5432/vitalizemaroc
+      FRONTEND_ORIGINS: http://localhost:3000
+      DELIVERY_FEE_MAD: ${DELIVERY_FEE_MAD:-0}
+      GOOGLE_SHEETS_WEBHOOK_URL: ${GOOGLE_SHEETS_WEBHOOK_URL:-}
+      GOOGLE_SHEETS_HMAC_SECRET: ${GOOGLE_SHEETS_HMAC_SECRET:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+        NEXT_PUBLIC_SITE_URL: http://localhost:3000
+        NEXT_PUBLIC_WHATSAPP_NUMBER: ${NEXT_PUBLIC_WHATSAPP_NUMBER:-}
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+
+volumes:
+  vitalize_pgdata:
