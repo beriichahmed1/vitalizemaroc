@@ -1,46 +1,53 @@
-# Vitalize Maroc — AI Coder Handoff
+# Vitalize Maroc
 
-This folder is the implementation brief for the first release of the DTC store at `https://vitalizemaroc.shop`. The launch market is **Morocco**. Build a branded, Arabic-first, mobile-first COD storefront, with the backend at `https://api.vitalizemaroc.shop`.
+Arabic-first Moroccan COD ecommerce store. Start with [`docs/README.md`](./docs/README.md).
 
-## Read in this order
+```text
+frontend/   Next.js 15 (App Router) + React 19 + TypeScript + Tailwind v4
+backend/    FastAPI + SQLAlchemy 2 + Alembic + PostgreSQL
+docs/       strategy, pricing, tracking, Google Sheets script, deployment notes
+```
 
-1. [Brand, market, and ICP](./01-brand-market-icp.md)
-2. [Products, pricing, and launch decisions](./02-products-pricing.md)
-3. [Store map, CRO, and copy requirements](./03-storefront-cro.md)
-4. [Design system and responsive behavior](./04-design-system.md)
-5. [Frontend implementation](./05-frontend.md)
-6. [Backend, data model, and order lifecycle](./06-backend.md)
-7. [Pixels, CAPI, privacy, and security](./07-tracking-privacy-security.md)
-8. [Google Sheets integration](./08-google-sheets.md)
-9. [Deployment, testing, and launch gates](./09-deployment-qa.md)
-10. [Copy-ready AI coder prompt](./10-ai-coder-prompt.md)
+## Run locally (Docker)
 
-Additional handoff assets:
+```bash
+docker compose up --build        # DELIVERY_FEE_MAD defaults to 0 (free delivery, owner-approved)
+```
 
-- [Google Apps Script webhook](./integrations/google-sheets/Code.gs)
-- [Google Sheet CSV header template](./templates/orders-template.csv)
-- [Frontend environment template](./templates/frontend.env.example)
-- [Backend environment template](./templates/backend.env.example)
+Open `http://localhost:3000`. API readiness: `http://localhost:8000/health/ready`. Migrations run automatically when the backend container starts (a PostgreSQL advisory lock prevents concurrent starts from racing).
 
-## Precedence and source of truth
+## Run without Docker
 
-- These docs capture the latest owner request and supersede conflicting values and unsupported claims in the older `VITALIZE_*` planning files at the workspace root.
-- The final owner-approved prices are product-specific. See the table below and [product pricing](./02-products-pricing.md) for all tiers and quantity grouping behavior.
-- Only information provided by the owner or backed by supplier/regulatory documentation may be published as fact. Never invent reviews, customers, certifications, medical/scientific outcomes, stock limits, countdown urgency, shipping times, or company credentials. Owner-approved facts (free delivery, inspection on delivery, 30-day defect guarantee, Immunity Shield composition) are recorded in `02-products-pricing.md`.
-- No production credentials were provided for these files. Never copy secrets from chat or commit real `.env` files.
+```bash
+# backend (Python 3.12)
+cd backend && python -m venv .venv && .venv/Scripts/activate   # Linux/macOS: source .venv/bin/activate
+pip install -e ".[test]"
+cp .env.example .env            # set DATABASE_URL, DELIVERY_FEE_MAD, APP_ENV=development
+alembic upgrade head && uvicorn app.main:app --reload
+pytest
 
-## Approved quantity pricing
+# frontend (Node 22+)
+cd frontend && cp .env.example .env.local
+npm ci && npm run typecheck && npm run lint && npm test && npm run build
+```
 
-| Product | 1 unit | 2 units | 3 units |
+## Approved quantity prices
+
+| Product | 1 | 2 | 3 |
 |---|---:|---:|---:|
-| Vitality Gummies | 280 MAD | 499 MAD | 690 MAD |
-| Immunity Shield | 240 MAD | 440 MAD | 620 MAD |
-| Endurance Power | 350 MAD | 640 MAD | 690 MAD |
+| Gummies | 280 MAD | 499 MAD | 690 MAD |
+| Immunity | 240 MAD | 440 MAD | 620 MAD |
+| Endurance | 350 MAD | 640 MAD | 690 MAD |
 
-The owner explicitly selected the 690 MAD three-unit Endurance option. Prices are implemented in the backend catalog and mirrored by the frontend display catalog; the API quote is authoritative. When quantity is greater than three, price complete groups of three plus the remaining one or two units using that product's approved tiers.
+The backend catalog (`backend/app/pricing.py`) is the pricing authority; `frontend/lib/catalog.ts` is a display mirror covered by tests.
 
-## Code status
+## Deploying on Easypanel
 
-The repository now includes `frontend/` and `backend/` application scaffolds with the approved pricing, COD order flow, PostgreSQL persistence, migrations, tests, and Docker setup. Checkout requires `DELIVERY_FEE_MAD` (set to `0` = approved free delivery) and the business confirming the delivery/address workflow.
+1. **Backend** service from `backend/` (Dockerfile). Set the variables from `backend/.env.example`. Use your internal Postgres URL as-is (`postgres://…?sslmode=disable`); the scheme is rewritten automatically. `ORDER_TOKEN_SECRET` and `GOOGLE_SHEETS_HMAC_SECRET` must be random 32+ character values.
+2. **Frontend** service from `frontend/` (Dockerfile). `NEXT_PUBLIC_*` values are inlined at build time, so add them as **Build Arguments** (see `frontend/.env.example`), then rebuild whenever they change.
+3. Domains: `vitalizemaroc.shop` → frontend (port 3000), `api.vitalizemaroc.shop` → backend (port 8000), HTTPS on both.
+4. By default the API process also runs the worker (upsell expiry, Sheets, conversion APIs). Set `RUN_WORKER_IN_API=false` and add a second service with container argument `worker` if you prefer separate processes.
 
-The Apps Script and CSV are handoff templates. Configure and test them in a separate test Sheet before production.
+## Before production
+
+Rotate the DB password that was shared in chat; set `DELIVERY_FEE_MAD=0` (free delivery is owner-approved) and the `NEXT_PUBLIC_WHATSAPP_NUMBER` build arg; replace placeholder images and policy text; deploy the Apps Script from `docs/` and test it with a separate test Sheet; review consent/legal requirements before enabling any pixel; verify CAPI events in each platform's test tool (see `docs/07-tracking-privacy-security.md`).
