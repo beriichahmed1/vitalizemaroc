@@ -21,7 +21,7 @@ export default function HomePage() {
       <section className="container hero">
         <div>
           <p className="muted">VITALIZE MAROC · فيتالايز المغرب</p>
-          <h1>رجّع ليك طاقتك ونشاطك كل نهار.</h1>
+          <h1><span className="hero-title">رجّع ليك طاقتك ونشاطك كل نهار.</span></h1>
           <p>تركيبة واضحة، ثمن شامل التوصيل، والدفع عند الاستلام.</p>
           <div className="actions"><Link className="button cta" href="/collections/all">تسوق المنتجات</Link></div>
         </div>
@@ -42,7 +42,7 @@ export default function HomePage() {
           {products.map((product) => (
             <article className="product-card" key={product.sku}>
               <Link href={`/products/${product.slug}`} className="product-art" aria-label={`تفاصيل ${product.nameAr}`}>صورة المنتج</Link>
-              <h3>{product.nameFr}<br /><small className="muted">{product.nameAr}</small></h3>
+              <h3><span dir="ltr" className="fr-name">{product.nameFr}</span><small className="muted">{product.nameAr}</small></h3>
               <p className="muted">{product.description}</p>
               <p className="price">{formatMad(product.unitPrice)}</p>
               <p className="muted small">عرض قطعتين {formatMad(product.tiers[1])} · 3 قطع {formatMad(product.tiers[2])}</p>

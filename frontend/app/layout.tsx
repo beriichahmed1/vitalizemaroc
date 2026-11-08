@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
-import { Tajawal } from "next/font/google";
+import { Cairo, Tajawal } from "next/font/google";
 import { ReactNode } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { StoreProvider } from "@/components/store-provider";
@@ -14,6 +14,13 @@ const tajawal = Tajawal({
   variable: "--font-tajawal",
 });
 
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  weight: ["700", "800", "900"],
+  display: "swap",
+  variable: "--font-cairo",
+});
+
 export const metadata: Metadata = {
   title: { default: "فيتالايز المغرب | Vitalize Maroc", template: "%s | فيتالايز المغرب" },
   description: "منتجات مختارة بعناية وتجربة شراء واضحة فالمغرب. الدفع عند الاستلام.",
@@ -25,7 +32,7 @@ export const viewport: Viewport = { themeColor: "#154d3a", width: "device-width"
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ar-MA" dir="rtl" className={tajawal.variable}>
+    <html lang="ar-MA" dir="rtl" className={`${tajawal.variable} ${cairo.variable}`}>
       <body>
         <StoreProvider>
           <TrackingBootstrap />
