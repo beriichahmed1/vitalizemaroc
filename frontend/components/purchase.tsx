@@ -3,7 +3,7 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { useStore } from "@/components/store-provider";
 import { getProduct } from "@/lib/catalog";
-import { productContent } from "@/lib/product-content";
+import { productContent, themeStyle } from "@/lib/product-content";
 import { whatsappUrl } from "@/lib/site";
 import { formatMad, savingsVsSingles, tierTotal } from "@/lib/pricing";
 
@@ -37,7 +37,7 @@ export function ProductPurchase({ sku }: { sku: string }) {
     const node = ctaRef.current;
     if (!node || !("IntersectionObserver" in window)) return;
     const observer = new IntersectionObserver(([entry]) => {
-      setStickyVisible(!entry.isIntersecting && entry.boundingClientRect.top < 0);
+      setStickyVisible(!entry.isIntersecting);
     });
     observer.observe(node);
     return () => observer.disconnect();
@@ -49,7 +49,7 @@ export function ProductPurchase({ sku }: { sku: string }) {
   const total = tierTotal(product.tiers, quantity);
 
   return (
-    <div>
+    <div className="themed" style={themeStyle(sku)}>
       <div className="quantity-options" role="radiogroup" aria-label="اختار الكمية">
         {product.tiers.map((tierPrice, index) => {
           const count = index + 1;
@@ -92,7 +92,7 @@ export function ProductPurchase({ sku }: { sku: string }) {
             <strong>{formatMad(total)}</strong>
             <small className="muted"> · {quantity} {quantity === 1 ? "قطعة" : "قطع"}</small>
           </div>
-          <button className="button cta" onClick={() => store.add(sku, quantity)}>زيد للسلة</button>
+          <button className="button cta" onClick={() => store.add(sku, quantity)}>اطلب الآن</button>
         </div>
       )}
     </div>

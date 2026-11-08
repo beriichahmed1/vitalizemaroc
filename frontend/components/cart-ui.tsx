@@ -5,6 +5,7 @@ import { FormEvent, useState } from "react";
 import type { CartLine, Quote } from "@/lib/api";
 import { getProduct, products } from "@/lib/catalog";
 import { formatMad } from "@/lib/pricing";
+import { themeStyle } from "@/lib/product-content";
 import { normalizeMoroccanMobile } from "@/lib/phone";
 import { useDialog } from "@/components/use-dialog";
 import type { CustomerInput, Upsell } from "@/components/store-provider";
@@ -222,16 +223,29 @@ function UpsellDialog(props: Props & { upsell: Upsell }) {
   const [total] = useState(() => Math.max(1, props.secondsLeft));
   const progress = Math.min(100, Math.max(0, (props.secondsLeft / total) * 100));
   const product = getProduct(props.upsell.sku);
+  const saving = product ? product.unitPrice - props.upsell.price_mad : 0;
 
   return (
     <div className="overlay center">
-      <section className="dialog" role="dialog" aria-modal="true" aria-labelledby="upsell-title" ref={ref} tabIndex={-1}>
-        <p className="muted small">طلبك تسجل ✓ — عرض اختياري قبل ما نكملو</p>
+      <section className="dialog upsell themed" style={themeStyle(props.upsell.sku)} role="dialog" aria-modal="true" aria-labelledby="upsell-title" ref={ref} tabIndex={-1}>
+        <div className="upsell-confirmed">✓ طلبك تسجل — المنتج ديالك مضمون بثمنو العادي</div>
+        <p className="muted small">عرض اختياري قبل ما نكملو · الدفع عند الاستلام · التوصيل شامل</p>
         <div className="countdown" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>
         <p className="muted small" role="timer">باقي {props.secondsLeft} ثانية</p>
-        <h2 id="upsell-title">زيد {product?.nameEn ?? "منتج"} بـ {formatMad(props.upsell.price_mad)} فقط</h2>
-        <p>{props.upsell.name_ar}</p>
-        <p className="muted small">الثمن العادي {product ? formatMad(product.unitPrice) : ""}. هاد العرض كيتزاد لنفس الطلب، والدفع عند الاستلام.</p>
+        <div className="upsell-offer">
+          <div className="product-art upsell-art" role="img" aria-label="صورة المنتج"><span>صورة</span></div>
+          <div>
+            <h2 id="upsell-title">زيد {product?.nameEn ?? "منتج"} بـ {formatMad(props.upsell.price_mad)} فقط</h2>
+            <p className="upsell-name"><span dir="ltr">{product?.nameFr}</span><small>{props.upsell.name_ar}</small></p>
+            {product && (
+              <p className="upsell-price">
+                <s>{formatMad(product.unitPrice)}</s> <strong>{formatMad(props.upsell.price_mad)}</strong>
+                {saving > 0 && <span className="saving-chip">وفّر {formatMad(saving)}</span>}
+              </p>
+            )}
+          </div>
+        </div>
+        <p className="muted small">كتزاد لنفس الطلب بلا مصاريف توصيل إضافية، وكتخلص كلشي عند الاستلام.</p>
         {props.error && <p className="form-error" role="alert">{props.error}</p>}
         <button className="button full cta" disabled={props.deciding || props.secondsLeft <= 0} onClick={() => props.onDecision("accept")}>
           نعم، زيدو للطلب — {formatMad(props.upsell.price_mad)}
