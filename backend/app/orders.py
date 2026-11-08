@@ -306,7 +306,16 @@ def update_contact(token: str, body: ContactUpdateIn, db: Session = Depends(get_
     db.add(OrderEvent(order_id=order.id, event_type="contact_updated", event_data={}))
     if order.status == "submitted":
         payload = {**sheet_payload(order), "order_status": "contact_updated"}
-        db.add(WebhookOutbox(order_id=order.id, payload=payload, state="pending"))
+        outbox = db.scalar(select(WebhookOutbox).where(WebhookOutbox.order_id == order.id))
+        if outbox:
+            outbox.payload = payload
+            outbox.state = "pending"
+            outbox.attempts = 0
+            outbox.next_attempt_at = datetime.now(timezone.utc)
+            outbox.last_error_code = None
+            outbox.delivered_at = None
+        else:
+            db.add(WebhookOutbox(order_id=order.id, payload=payload, state="pending"))
     db.commit()
     return public_order(order)
 
