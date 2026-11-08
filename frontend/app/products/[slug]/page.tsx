@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ProductViewTracker } from "@/components/product-view-tracker";
 import { AddToCartButton, ProductPurchase } from "@/components/purchase";
 import { formatMad, getProduct, products } from "@/lib/catalog";
-import { productContent } from "@/lib/product-content";
+import { productContent, themeStyle } from "@/lib/product-content";
 import { reviews } from "@/lib/reviews";
 import { whatsappUrl } from "@/lib/site";
 
@@ -42,13 +42,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const waUrl = whatsappUrl(`السلام، بغيت نستفسر على ${product.nameAr}`);
 
   return (
-    <main className="container">
+    <main className="container themed" style={themeStyle(product.sku)}>
       <ProductViewTracker sku={product.sku} />
       <section className="product-layout" id="order">
         <div>
           <p className="chip-line"><span className="best-chip">🚚 Livraison incluse · التوصيل شامل فالثمن</span></p>
-          <p className="muted" dir="ltr">{product.nameFr}<br /><span dir="rtl">{product.nameAr}</span></p>
-          <h1>{content.headline}</h1>
+          <p className="product-name"><span className="fr" dir="ltr">{product.nameFr}</span><span className="ar">{product.nameAr}</span></p>
+          <h1 className="product-headline">{content.headline}</h1>
           <p className="lead">{content.subheadline}</p>
           <ul className="check-list">
             {content.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}
@@ -162,7 +162,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           {products.filter((item) => item.sku !== product.sku).map((item) => (
             <article className="product-card" key={item.sku}>
               <Link href={`/products/${item.slug}`} className="product-art">صورة المنتج</Link>
-              <h3>{item.nameAr}</h3>
+              <h3><span dir="ltr" className="fr-name">{item.nameFr}</span><small className="muted">{item.nameAr}</small></h3>
               <p className="price">{formatMad(item.unitPrice)}</p>
               <AddToCartButton sku={item.sku}>زيد للسلة</AddToCartButton>
             </article>
