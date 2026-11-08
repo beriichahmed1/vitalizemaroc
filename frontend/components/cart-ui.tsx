@@ -16,6 +16,10 @@ const CITIES = [
   "آسفي", "الصويرة", "العرائش", "برشيد", "الخميسات", "الحسيمة", "تيزنيت", "ورزازات",
 ];
 
+function boxes(quantity: number) {
+  return `${quantity} ${quantity > 1 ? "boîtes" : "boîte"}`;
+}
+
 type Props = {
   lines: CartLine[];
   quote: Quote | null;
@@ -58,10 +62,10 @@ function CartDrawer(props: Props) {
   const canCheckout = Boolean(quote?.checkout_ready) && !props.quoteLoading && !props.quoteError;
 
   return (
-    <div className="overlay" role="presentation" onMouseDown={(event) => {
+    <div className="overlay center" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget) props.onCloseCart();
     }}>
-      <aside className="drawer" role="dialog" aria-modal="true" aria-labelledby="cart-title" ref={ref} tabIndex={-1}>
+      <aside className="drawer cart-modal" role="dialog" aria-modal="true" aria-labelledby="cart-title" ref={ref} tabIndex={-1}>
         <div className="drawer-head">
           <h2 id="cart-title">السلة ({count})</h2>
           <button className="icon-button" onClick={props.onCloseCart} aria-label="إغلاق السلة">×</button>
@@ -77,8 +81,10 @@ function CartDrawer(props: Props) {
               if (!product) return null;
               return (
                 <div className="line-item" key={line.sku}>
-                  <div>
-                    <strong>{product.nameAr}</strong>
+                  <div className="thumb" role="img" aria-label="صورة المنتج">صورة</div>
+                  <div className="line-info">
+                    <strong dir="ltr" className="fr-line">{product.nameFr}</strong>
+                    <div className="muted small">{boxes(line.quantity)}</div>
                     <div className="price small">{row ? formatMad(row.offer_total_mad) : "..."}</div>
                     {row && row.savings_mad > 0 && <div className="saving-chip">وفرتي {formatMad(row.savings_mad)}</div>}
                     <button className="text-button" onClick={() => props.onRemove(line.sku)}>حيد المنتج</button>
@@ -98,8 +104,9 @@ function CartDrawer(props: Props) {
                 <p className="muted small">إضافة منتج كتبدل مجموع العرض؛ الثمن النهائي كيتحسب ف السلة.</p>
                 {crossSells.map((product) => (
                   <div className="cross-item" key={product.sku}>
-                    <div>
-                      <strong>{product.nameAr}</strong>
+                    <div className="thumb" role="img" aria-label="صورة المنتج">صورة</div>
+                    <div className="line-info">
+                      <strong dir="ltr" className="fr-line">{product.nameFr}</strong>
                       <div className="muted small">{formatMad(product.unitPrice)}</div>
                     </div>
                     <button className="button secondary" onClick={() => props.onAdd(product.sku, 1)}>زيد</button>
@@ -184,7 +191,7 @@ function CheckoutDialog(props: Props) {
         </div>
         <div className="panel summary">
           {rows.map((row) => (
-            <div className="total-row" key={row.sku}><span>{getProduct(row.sku)?.nameAr ?? row.name_ar} × {row.quantity}</span><strong>{formatMad(row.offer_total_mad)}</strong></div>
+            <div className="total-row" key={row.sku}><span className="co-row"><span className="thumb sm" role="img" aria-label="صورة المنتج">صورة</span><span><strong dir="ltr" className="fr-line">{getProduct(row.sku)?.nameFr ?? row.name_ar}</strong><small className="muted">{boxes(row.quantity)}</small></span></span><strong>{formatMad(row.offer_total_mad)}</strong></div>
           ))}
           {props.quote && props.quote.quantity_offer_savings_mad > 0 && (
             <div className="total-row saving-row"><span>مجموع التوفير</span><strong>{formatMad(props.quote.quantity_offer_savings_mad)}</strong></div>
@@ -236,7 +243,7 @@ function UpsellDialog(props: Props & { upsell: Upsell }) {
           <div className="product-art upsell-art" role="img" aria-label="صورة المنتج"><span>صورة</span></div>
           <div>
             <h2 id="upsell-title">زيد {product?.nameEn ?? "منتج"} بـ {formatMad(props.upsell.price_mad)} فقط</h2>
-            <p className="upsell-name"><span dir="ltr">{product?.nameFr}</span><small>{props.upsell.name_ar}</small></p>
+            <p className="upsell-name"><span dir="ltr">{product?.nameFr}</span></p>
             {product && (
               <p className="upsell-price">
                 <s>{formatMad(product.unitPrice)}</s> <strong>{formatMad(props.upsell.price_mad)}</strong>
