@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
-import { Cairo, Tajawal } from "next/font/google";
+import { Tajawal } from "next/font/google";
 import { ReactNode } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { StoreProvider } from "@/components/store-provider";
@@ -9,16 +9,9 @@ import "./globals.css";
 
 const tajawal = Tajawal({
   subsets: ["arabic", "latin"],
-  weight: ["400", "500", "700", "800"],
+  weight: ["400", "500", "700", "800", "900"],
   display: "swap",
   variable: "--font-tajawal",
-});
-
-const cairo = Cairo({
-  subsets: ["arabic", "latin"],
-  weight: ["700", "800", "900"],
-  display: "swap",
-  variable: "--font-cairo",
 });
 
 export const metadata: Metadata = {
@@ -32,7 +25,7 @@ export const viewport: Viewport = { themeColor: "#154d3a", width: "device-width"
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ar-MA" dir="rtl" className={`${tajawal.variable} ${cairo.variable}`}>
+    <html lang="ar-MA" dir="rtl" className={tajawal.variable}>
       <body>
         <StoreProvider>
           <TrackingBootstrap />
