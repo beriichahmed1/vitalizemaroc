@@ -34,6 +34,7 @@ export type OrderResult = {
 export type OrderStatus = {
   order_id: string;
   status: string;
+  customer?: { name: string; phone: string; city: string };
   items: Array<{ sku: string; name: string; quantity: number; line_total_mad: number }>;
   total_mad: number;
   delivery_fee_mad: number;
@@ -72,6 +73,13 @@ export function decideUpsell(token: string, decision: "accept" | "decline") {
   return request<OrderStatus>(`/orders/${encodeURIComponent(token)}/upsell`, {
     method: "POST",
     body: JSON.stringify({ decision }),
+  });
+}
+
+export function updateOrderContact(token: string, customer: { name: string; phone: string; city: string }) {
+  return request<OrderStatus>(`/orders/${encodeURIComponent(token)}/contact`, {
+    method: "POST",
+    body: JSON.stringify(customer),
   });
 }
 

@@ -1,3 +1,18 @@
+export type ProductTheme = { accent: string; dark: string; tint: string };
+
+export const productThemes: Record<string, ProductTheme> = {
+  "vitality-gummies": { accent: "#e07a10", dark: "#b45f08", tint: "#fff3e3" },
+  "immunity-shield": { accent: "#0e7490", dark: "#0a5a70", tint: "#e4f4f8" },
+  "endurance-power": { accent: "#c0283c", dark: "#9b1e2f", tint: "#fdebed" },
+};
+
+export const defaultTheme: ProductTheme = { accent: "#154d3a", dark: "#103b2d", tint: "#e7f3ec" };
+
+export function themeStyle(sku: string): Record<string, string> {
+  const theme = productThemes[sku] ?? defaultTheme;
+  return { "--accent": theme.accent, "--accent-dark": theme.dark, "--accent-tint": theme.tint };
+}
+
 export type Ingredient = { name: string; amount: string; role: string };
 
 export type ProductContent = {
