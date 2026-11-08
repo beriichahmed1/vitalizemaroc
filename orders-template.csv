@@ -1,1 +1,0 @@
-order_id,created_at_utc,order_status,customer_name,customer_phone,customer_city,currency,payment_method,items_json,regular_subtotal_mad,quantity_offer_savings_mad,post_form_offer_mad,delivery_fee_mad,total_mad,attribution_json,webhook_received_at_utc
