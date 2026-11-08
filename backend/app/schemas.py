@@ -62,5 +62,9 @@ class OrderCreateIn(BaseModel):
     tracking: TrackingIn | None = None
 
 
+class ContactUpdateIn(CustomerIn):
+    pass
+
+
 class UpsellDecisionIn(BaseModel):
     decision: str = Field(pattern="^(accept|decline)$")

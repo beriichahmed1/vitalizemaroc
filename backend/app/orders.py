@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.db import SessionLocal
 from app.models import Order, OrderEvent, OrderItem, WebhookOutbox
 from app.pricing import PRODUCTS, calculate_quote
-from app.schemas import OrderCreateIn, QuoteIn, UpsellDecisionIn
+from app.schemas import ContactUpdateIn, OrderCreateIn, QuoteIn, UpsellDecisionIn
 from app.security import issue_order_token, normalize_moroccan_mobile, request_digest, verify_order_token
 from app.settings import get_settings
 from app.tracking.capi import enqueue_conversions
@@ -98,6 +98,7 @@ def public_order(order: Order) -> dict:
     return {
         "order_id": order.id,
         "status": order.status,
+        "customer": {"name": order.customer_name, "phone": order.customer_phone, "city": order.customer_city},
         "items": order_items_data(order),
         "regular_subtotal_mad": order.regular_subtotal_mad,
         "quantity_offer_savings_mad": order.quantity_offer_savings_mad,
@@ -285,6 +286,27 @@ def decide_upsell(token: str, body: UpsellDecisionIn, db: Session = Depends(get_
     else:
         db.add(OrderEvent(order_id=order.id, event_type="upsell_declined", event_data={}))
     finalize_order(db, order)
+    db.commit()
+    return public_order(order)
+
+
+@router.post("/orders/{token}/contact")
+def update_contact(token: str, body: ContactUpdateIn, db: Session = Depends(get_db)):
+    order = load_order(db, verify_order_token(token), lock=True)
+    if not order:
+        raise HTTPException(status_code=404, detail="order_not_found")
+    try:
+        phone = normalize_moroccan_mobile(body.phone)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
+    order.customer_name = body.name
+    order.customer_phone = phone
+    order.customer_city = body.city
+    db.add(OrderEvent(order_id=order.id, event_type="contact_updated", event_data={}))
+    if order.status == "submitted":
+        payload = {**sheet_payload(order), "order_status": "contact_updated"}
+        db.add(WebhookOutbox(order_id=order.id, payload=payload, state="pending"))
     db.commit()
     return public_order(order)
 
