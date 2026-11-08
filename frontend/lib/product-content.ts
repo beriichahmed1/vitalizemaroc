@@ -9,7 +9,9 @@ export const productThemes: Record<string, ProductTheme> = {
 export const defaultTheme: ProductTheme = { accent: "#154d3a", dark: "#103b2d", tint: "#e7f3ec" };
 
 export function themeStyle(sku: string): Record<string, string> {
-  const theme = productThemes[sku] ?? defaultTheme;
+  // One brand color across the whole flow (home, product, cart, upsell) to look consistent.
+  const theme = defaultTheme;
+  void sku;
   return { "--accent": theme.accent, "--accent-dark": theme.dark, "--accent-tint": theme.tint };
 }
 
