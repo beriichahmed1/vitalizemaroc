@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { fetchOrderStatus, updateOrderContact, type OrderStatus } from "@/lib/api";
+import { getProduct } from "@/lib/catalog";
 import { normalizeMoroccanMobile } from "@/lib/phone";
 import { formatMad } from "@/lib/pricing";
 import { trackEvent } from "@/lib/tracking";
@@ -127,7 +128,7 @@ export default function ThankYouPage() {
             <h2 className="mini-title">ملخص الطلب</h2>
             <div className="info-card">
               {state.items?.map((item, index) => (
-                <div className="total-row" key={`${item.sku}-${index}`}><span>{item.name} × {item.quantity}</span><strong>{formatMad(item.line_total_mad)}</strong></div>
+                <div className="total-row" key={`${item.sku}-${index}`}><span><strong dir="ltr">{getProduct(item.sku)?.nameFr ?? item.name}</strong> <small className="muted">· {item.quantity} {item.quantity > 1 ? "boîtes" : "boîte"}</small></span><strong>{formatMad(item.line_total_mad)}</strong></div>
               ))}
               <div className="total-row grand"><span>المجموع عند الاستلام</span><strong>{formatMad(state.total ?? null)}</strong></div>
             </div>
