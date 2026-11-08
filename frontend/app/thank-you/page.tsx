@@ -132,7 +132,7 @@ export default function ThankYouPage() {
               ))}
               <div className="total-row grand"><span>المجموع عند الاستلام</span><strong>{formatMad(state.total ?? null)}</strong></div>
             </div>
-            <p className="muted small">مرجع الطلب: <strong dir="ltr">{state.orderId}</strong>. هاد التأكيد كيعني أن الطلب تسجل، ماشي أنه توصل أو تخلص.</p>
+            <p className="muted small">مرجع الطلب: <strong dir="ltr">{state.orderId}</strong></p>
           </>
         ) : state?.error ? (
           <p role="alert">{state.error}</p>
