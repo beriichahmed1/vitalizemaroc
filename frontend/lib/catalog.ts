@@ -33,7 +33,7 @@ export const products: Product[] = [
     nameAr: "إيمونيتي شيلد – درع المناعة",
     nameEn: "Immunity Shield",
     nameFr: "Immunity Shield – Bouclier immunité",
-    description: "فيتامين C 500mg وسبيرولينا 300mg وزنك 15mg. علبة من 60 كبسولة تكفي شهراً كاملاً.",
+    description: "سبيرولينا 92% وفيتامين C 8%. 60 كبسولة تكفي حتى شهر كامل (بجرعة كبسولتين يوميا).",
     unitPrice: 240,
     tiers: [240, 440, 620],
     category: "الصحة والعافية",
