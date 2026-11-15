@@ -106,7 +106,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       </section>
 
       <section className="section split flip" id="ingredients">
-        <div className="product-art" role="img" aria-label="صورة مؤقتة للمكونات"><div><span className="muted">صورة المكونات / العلبة (مؤقتة)</span></div></div>
+        {images[2] ? (
+  // eslint-disable-next-line @next/next/no-img-element
+  <img src={images[2].src} alt={images[2].alt} style={{ width: "100%", height: "auto", borderRadius: 16 }} />
+) : (
+  <div className="product-art" role="img" aria-label="صورة مؤقتة للمكونات"><div><span className="muted">صورة المكونات / العلبة (مؤقتة)</span></div></div>
+)}
         <div>
           <h2>التركيبة كاملة وشفافة</h2>
           {content.ingredients ? (
