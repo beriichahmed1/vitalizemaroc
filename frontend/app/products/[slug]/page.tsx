@@ -32,7 +32,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const product = getProduct(slug);
   return product ? { title: product.nameAr, description: product.description } : {};
 }
-
+const PRODUCT_IMAGES: Record<string, { src: string; alt: string }[]> = {
+  "immunity-shield": [
+    { src: "/products/immunity-shield/main.png", alt: "Immunity Shield" },
+    { src: "/products/immunity-shield/lifestyle.jpg", alt: "Immunity Shield lifestyle" },
+    { src: "/products/immunity-shield/ingredients.jpg", alt: "Immunity Shield ingredients" },
+  ],
+  "vitality-gummies": [
+    { src: "/products/vitality-gummies/main.jpg", alt: "Vitality Gummies" },
+    { src: "/products/vitality-gummies/lifestyle.png", alt: "Vitality Gummies lifestyle" },
+    { src: "/products/vitality-gummies/ingredients.png", alt: "Vitality Gummies ingredients" },
+  ],
+  "endurance-power": [],
+};
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const product = getProduct(slug);
@@ -40,6 +52,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   const content = productContent[product.sku];
   const waUrl = whatsappUrl(`السلام، بغيت نستفسر على ${product.nameAr}`);
+  const images = PRODUCT_IMAGES[product.sku] ?? [];
 
   return (
     <main className="container themed" style={themeStyle(product.sku)}>
@@ -56,9 +69,23 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <p className="price">ابتداءً من {formatMad(product.unitPrice)} <small className="muted">· السعر النهائي شامل التوصيل</small></p>
           <ProductPurchase sku={product.sku} />
         </div>
+        {images.length > 0 ? (
+  <div style={{ display: "grid", gap: 12 }}>
+    {images.map((img) => (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        key={img.src}
+        src={img.src}
+        alt={img.alt}
+        style={{ width: "100%", height: "auto", borderRadius: 16 }}
+      />
+    ))}
+  </div>
+) : (
         <div className="product-art" role="img" aria-label={`صورة توضيحية مؤقتة لـ ${product.nameAr}`}>
           <div><strong>{product.nameEn}</strong><br /><span className="muted">صورة مؤقتة — عوضها بصور المنتج الفعلية</span></div>
         </div>
+        )}
       </section>
 
       <section className="trust-badges" aria-label="ضمانات الطلب">
