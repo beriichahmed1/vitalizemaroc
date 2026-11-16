@@ -205,3 +205,14 @@ h1, h2, h3, .hero-title { font-family: var(--font-tajawal), Tahoma, sans-serif; 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+@media (max-width: 768px) {
+  .product-layout > .product-gallery,
+  .product-layout > .product-art {
+    order: -1;
+  }
+  .product-gallery img {
+    max-height: 340px;
+    object-fit: contain;
+  }
+}
