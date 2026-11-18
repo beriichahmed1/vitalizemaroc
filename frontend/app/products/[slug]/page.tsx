@@ -74,8 +74,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <ProductPurchase sku={product.sku} />
         </div>
         {images.length > 0 ? (
-  <div style={{ display: "grid", gap: 12 }}>
-    {images.slice(0, 1).map((img) => (
+  <div className="product-gallery" style={{ display: "grid", gap: 12 }}>
+    {images.map((img) => (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         key={img.src}
