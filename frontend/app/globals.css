@@ -216,3 +216,8 @@ h1, h2, h3, .hero-title { font-family: var(--font-tajawal), Tahoma, sans-serif; 
     object-fit: contain;
   }
 }
+@media (max-width: 768px) {
+  #ingredients > :first-child {
+    order: 2 !important;
+  }
+}
