@@ -3,6 +3,10 @@ import Link from "next/link";
 import { AddToCartButton } from "@/components/purchase";
 import { formatMad, products } from "@/lib/catalog";
 
+const COLLECTION_IMAGES: Record<string, string> = {
+  "immunity-shield": "/products/immunity-shield/main.png",
+  "vitality-gummies": "/products/vitality-gummies/main.jpg",
+};
 export const metadata: Metadata = { title: "المنتجات" };
 
 export default function CollectionPage() {
@@ -16,7 +20,14 @@ export default function CollectionPage() {
       <section className="product-grid section">
         {products.map((product) => (
           <article className="product-card" key={product.sku}>
-            <Link href={`/products/${product.slug}`} className="product-art" aria-label={`عرض ${product.nameAr}`}>صورة المنتج</Link>
+            <Link href={`/products/${product.slug}`} className="product-art" aria-label={`عرض ${product.nameAr}`}>
+  {COLLECTION_IMAGES[product.slug] ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={COLLECTION_IMAGES[product.slug]} alt={product.nameEn} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+  ) : (
+    "صورة المنتج"
+  )}
+</Link>
             <h2>{product.nameAr}</h2>
             <p className="muted">{product.description}</p>
             <p className="price">{formatMad(product.unitPrice)}</p>

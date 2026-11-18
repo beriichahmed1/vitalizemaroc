@@ -45,6 +45,10 @@ const PRODUCT_IMAGES: Record<string, { src: string; alt: string }[]> = {
   ],
   "endurance-power": [],
 };
+const CROSS_IMAGES: Record<string, string> = {
+  "immunity-shield": "/products/immunity-shield/main.png",
+  "vitality-gummies": "/products/vitality-gummies/main.jpg",
+};
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const product = getProduct(slug);
@@ -70,8 +74,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <ProductPurchase sku={product.sku} />
         </div>
         {images.length > 0 ? (
-  <div className="product-gallery" style={{ display: "grid", gap: 12 }}>
-    {images.slice(0, 1).map((img) => (
+  <div style={{ display: "grid", gap: 12 }}>
+    {images.map((img) => (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         key={img.src}
@@ -102,7 +106,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </ul>
           <p>{product.nameAr} مصمم باش يكون جزء بسيط من روتينك اليومي، بتركيبة واضحة وثمن واضح.</p>
         </div>
-        <div className="product-art" role="img" aria-label="صورة مؤقتة"><div><span className="muted">صورة نمط الحياة (مؤقتة)</span></div></div>
+        {images[1] ? (<img src={images[1].src} alt={images[1].alt} style={{ width: "100%", height: "auto", borderRadius: 16 }} />) : (<div className="product-art" role="img" aria-label="صورة مؤقتة"><div><span className="muted">صورة نمط الحياة (مؤقتة)</span></div></div>)}
       </section>
 
       <section className="section split flip" id="ingredients">
@@ -159,7 +163,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </ul>
           <p><Link href="/policies/returns" className="text-button">شروط الاسترجاع والاستبدال</Link></p>
         </div>
-        <div className="product-art" role="img" aria-label="ضمان 30 يوماً"><div><strong>ضمان 30 يوماً</strong><br /><span className="muted">عيب تغليف أو تصنيع</span></div></div>
+        
       </section>
 
       <section className="section split flip">
@@ -193,7 +197,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <div className="product-grid">
           {products.filter((item) => item.sku !== product.sku).map((item) => (
             <article className="product-card" key={item.sku}>
-              <Link href={`/products/${item.slug}`} className="product-art">صورة المنتج</Link>
+              <Link href={`/products/${item.slug}`} className="product-art">
+  {CROSS_IMAGES[item.slug] ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={CROSS_IMAGES[item.slug]} alt={item.nameEn} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+  ) : (
+    "صورة المنتج"
+  )}
+</Link>
               <h3><span dir="ltr" className="fr-name">{item.nameFr}</span><small className="muted">{item.nameAr}</small></h3>
               <p className="price">{formatMad(item.unitPrice)}</p>
               <AddToCartButton sku={item.sku}>زيد للسلة</AddToCartButton>

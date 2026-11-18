@@ -15,6 +15,10 @@ const FAQ = [
   { q: "شنو الفرق بين العروض؟", a: "كل ما زدتي قطع من نفس المنتج، الثمن ديال القطعة كيهبط. الثمن الإجمالي كيبان قبل الإضافة للسلة." },
 ];
 
+const HOME_IMAGES: Record<string, string> = {
+  "immunity-shield": "/products/immunity-shield/main.png",
+  "vitality-gummies": "/products/vitality-gummies/main.jpg",
+};
 export default function HomePage() {
   return (
     <main>
@@ -41,7 +45,14 @@ export default function HomePage() {
         <div className="product-grid">
           {products.map((product) => (
             <article className="product-card" key={product.sku}>
-              <Link href={`/products/${product.slug}`} className="product-art" aria-label={`تفاصيل ${product.nameAr}`}>صورة المنتج</Link>
+              <Link href={`/products/${product.slug}`} className="product-art" aria-label={`تفاصيل ${product.nameAr}`}>
+  {HOME_IMAGES[product.slug] ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={HOME_IMAGES[product.slug]} alt={product.nameEn} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+  ) : (
+    "صورة المنتج"
+  )}
+</Link>
               <h3><span dir="ltr" className="fr-name">{product.nameFr}</span><small className="muted">{product.nameAr}</small></h3>
               <p className="muted">{product.description}</p>
               <p className="price">{formatMad(product.unitPrice)}</p>

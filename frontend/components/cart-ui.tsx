@@ -52,6 +52,24 @@ export function CartUI(props: Props) {
   );
 }
 
+const THUMB_IMAGES: Record<string, string> = {
+  "immunity-shield": "/products/immunity-shield/main.png",
+  "vitality-gummies": "/products/vitality-gummies/main.jpg",
+};
+
+function Thumb({ slug, className }: { slug?: string; className: string }) {
+  const src = slug ? THUMB_IMAGES[slug] : undefined;
+  return (
+    <div
+      className={className}
+      role="img"
+      aria-label="صورة المنتج"
+      style={src ? { backgroundImage: `url(${src})`, backgroundSize: "contain", backgroundRepeat: "no-repeat", backgroundPosition: "center" } : undefined}
+    >
+      {src ? null : "صورة"}
+    </div>
+  );
+}
 function CartDrawer(props: Props) {
   const active = props.cartOpen && !props.checkoutOpen && !props.upsell;
   const ref = useDialog<HTMLElement>(active, props.onCloseCart);
@@ -81,7 +99,7 @@ function CartDrawer(props: Props) {
               if (!product) return null;
               return (
                 <div className="line-item" key={line.sku}>
-                  <div className="thumb" role="img" aria-label="صورة المنتج">صورة</div>
+                  <Thumb slug={product.slug} className="thumb" />
                   <div className="line-info">
                     <strong dir="ltr" className="fr-line">{product.nameFr}</strong>
                     <div className="muted small">{boxes(line.quantity)}</div>
@@ -104,7 +122,7 @@ function CartDrawer(props: Props) {
                 <p className="muted small">إضافة منتج كتبدل مجموع العرض؛ الثمن النهائي كيتحسب ف السلة.</p>
                 {crossSells.map((product) => (
                   <div className="cross-item" key={product.sku}>
-                    <div className="thumb" role="img" aria-label="صورة المنتج">صورة</div>
+                    <Thumb slug={product.slug} className="thumb" />
                     <div className="line-info">
                       <strong dir="ltr" className="fr-line">{product.nameFr}</strong>
                       <div className="muted small">{formatMad(product.unitPrice)}</div>
@@ -191,7 +209,7 @@ function CheckoutDialog(props: Props) {
         </div>
         <div className="panel summary">
           {rows.map((row) => (
-            <div className="total-row" key={row.sku}><span className="co-row"><span className="thumb sm" role="img" aria-label="صورة المنتج">صورة</span><span><strong dir="ltr" className="fr-line">{getProduct(row.sku)?.nameFr ?? row.name_ar}</strong><small className="muted">{boxes(row.quantity)}</small></span></span><strong>{formatMad(row.offer_total_mad)}</strong></div>
+            <div className="total-row" key={row.sku}><span className="co-row"><Thumb slug={getProduct(row.sku)?.slug} className="thumb sm" /><span><strong dir="ltr" className="fr-line">{getProduct(row.sku)?.nameFr ?? row.name_ar}</strong><small className="muted">{boxes(row.quantity)}</small></span></span><strong>{formatMad(row.offer_total_mad)}</strong></div>
           ))}
           {props.quote && props.quote.quantity_offer_savings_mad > 0 && (
             <div className="total-row saving-row"><span>مجموع التوفير</span><strong>{formatMad(props.quote.quantity_offer_savings_mad)}</strong></div>
@@ -240,7 +258,7 @@ function UpsellDialog(props: Props & { upsell: Upsell }) {
         <div className="countdown" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>
         <p className="muted small" role="timer">باقي {props.secondsLeft} ثانية</p>
         <div className="upsell-offer">
-          <div className="product-art upsell-art" role="img" aria-label="صورة المنتج"><span>صورة</span></div>
+          <Thumb slug={product?.slug} className="product-art upsell-art" />
           <div>
             <h2 id="upsell-title">زيد {product?.nameEn ?? "منتج"} بـ {formatMad(props.upsell.price_mad)} فقط</h2>
             <p className="upsell-name"><span dir="ltr">{product?.nameFr}</span></p>
