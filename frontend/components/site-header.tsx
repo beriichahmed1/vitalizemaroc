@@ -11,7 +11,7 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="container header-row">
         <Link href="/" className="brand" aria-label="Vitalize Maroc الصفحة الرئيسية">
-          <img src="/logo.svg" alt="Vitalize Maroc" width={40} height={40} style={{ borderRadius: "50%", display: "block" }} />
+          <img src="/logo.png" alt="Vitalize Maroc" width={40} height={40} style={{ borderRadius: "50%", display: "block" }} />
           <span className="brand-copy">
             <strong>فيتالايز المغرب</strong>
             <small>Vitalize Maroc</small>
