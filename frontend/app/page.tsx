@@ -29,8 +29,13 @@ export default function HomePage() {
           <p>تركيبة واضحة، ثمن شامل التوصيل، والدفع عند الاستلام.</p>
           <div className="actions"><Link className="button cta" href="/collections/all">تسوق المنتجات</Link></div>
         </div>
-        <div className="hero-art" role="img" aria-label="مساحة مخصصة لصورة حقيقية للمنتجات">
-          <div><strong>صورة المتجر</strong><br /><span className="muted">استبدل هاد المساحة بصور المنتجات الحقيقية</span></div>
+        <div className="hero-art" role="img" aria-label="صورة المنتجات">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/hero.jpg"
+            alt="Vitalize Maroc"
+            style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }}
+          />
         </div>
       </section>
 
@@ -46,13 +51,13 @@ export default function HomePage() {
           {products.map((product) => (
             <article className="product-card" key={product.sku}>
               <Link href={`/products/${product.slug}`} className="product-art" aria-label={`تفاصيل ${product.nameAr}`}>
-  {HOME_IMAGES[product.slug] ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={HOME_IMAGES[product.slug]} alt={product.nameEn} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-  ) : (
-    "صورة المنتج"
-  )}
-</Link>
+                {HOME_IMAGES[product.slug] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={HOME_IMAGES[product.slug]} alt={product.nameEn} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                ) : (
+                  "صورة المنتج"
+                )}
+              </Link>
               <h3><span dir="ltr" className="fr-name">{product.nameFr}</span><small className="muted">{product.nameAr}</small></h3>
               <p className="muted">{product.description}</p>
               <p className="price">{formatMad(product.unitPrice)}</p>
