@@ -32,7 +32,39 @@ class Settings(BaseSettings):
     snap_capi_access_token: str = ""
     snap_capi_validate_only: bool = False
 
+    # SpaceSeller (logistics / COD fulfilment). Left blank until the account is provisioned;
+    # every SpaceSeller call is skipped while `spaceseller_configured` is False.
+    spaceseller_base_url: str = ""
+    spaceseller_api_token: str = ""
+    spaceseller_api_key: str = ""
+    spaceseller_auth_scheme: str = "Bearer"
+    spaceseller_leads_path: str = "/api/v1/leads"
+    spaceseller_orders_path: str = "/api/v1/orders"
+    spaceseller_health_path: str = "/api/v1/ping"
+    spaceseller_timeout_seconds: float = Field(default=15.0, gt=0, le=60)
+    spaceseller_max_retries: int = Field(default=3, ge=0, le=5)
+    spaceseller_user_agent: str = "VitalizeMaroc/1.0"
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", env_ignore_empty=True)
+
+    @field_validator("spaceseller_base_url")
+    @classmethod
+    def normalize_spaceseller_base_url(cls, value: str) -> str:
+        return value.strip().rstrip("/")
+
+    @property
+    def spaceseller_configured(self) -> bool:
+        """True only when a base URL and at least one credential are present."""
+        return bool(self.spaceseller_base_url) and bool(
+            self.spaceseller_api_token or self.spaceseller_api_key
+        )
+
+    def spaceseller_auth_header_value(self) -> str:
+        if not self.spaceseller_api_token:
+            return ""
+        scheme = self.spaceseller_auth_scheme.strip()
+        token = self.spaceseller_api_token.strip()
+        return f"{scheme} {token}".strip() if scheme else token
 
     @field_validator("database_url")
     @classmethod

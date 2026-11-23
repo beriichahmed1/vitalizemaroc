@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.db import SessionLocal
+from app.integrations.spaceseller.outbox import enqueue_lead
 from app.models import Order, OrderEvent, OrderItem, WebhookOutbox
 from app.pricing import PRODUCTS, calculate_quote
 from app.schemas import ContactUpdateIn, OrderCreateIn, QuoteIn, UpsellDecisionIn
@@ -92,6 +93,8 @@ def finalize_order(db: Session, order: Order) -> None:
     order.upsell_expires_at = None
     db.add(WebhookOutbox(order_id=order.id, payload=sheet_payload(order), state="pending"))
     enqueue_conversions(db, order, get_settings())
+    # No-op unless SpaceSeller credentials are configured; see settings.spaceseller_configured.
+    enqueue_lead(db, order, get_settings())
 
 
 def public_order(order: Order) -> dict:

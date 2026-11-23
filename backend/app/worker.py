@@ -11,7 +11,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.db import SessionLocal
-from app.models import Order, TrackingOutbox, WebhookOutbox
+from app.integrations.spaceseller.client import SpaceSellerClient
+from app.integrations.spaceseller.errors import SpaceSellerError
+from app.integrations.spaceseller.outbox import next_state, store_error_code
+from app.models import Order, SpaceSellerOutbox, TrackingOutbox, WebhookOutbox
 from app.orders import finalize_order
 from app.settings import get_settings
 from app.tracking.capi import TrackingSendError, send_conversion
@@ -145,9 +148,62 @@ def deliver_one_tracking() -> bool:
     return error_code is None
 
 
+def deliver_one_spaceseller() -> bool:
+    """Ship one queued lead to SpaceSeller. Mirrors deliver_one_tracking."""
+    settings = get_settings()
+    if not settings.spaceseller_configured:
+        return False
+
+    with SessionLocal() as db:
+        row = db.scalar(
+            select(SpaceSellerOutbox)
+            .where(
+                SpaceSellerOutbox.state == "pending",
+                SpaceSellerOutbox.next_attempt_at <= datetime.now(timezone.utc),
+            )
+            .order_by(SpaceSellerOutbox.id)
+            .with_for_update(skip_locked=True)
+            .limit(1)
+        )
+        if not row:
+            return False
+        row_id, order_id = row.id, row.order_id
+        row.attempts += 1
+        # Push the next attempt out so a crash mid-request cannot cause a hot retry loop.
+        row.next_attempt_at = backoff(row.attempts)
+        db.commit()
+
+    error_code = None
+    permanent = False
+    space_seller_id = None
+    with SessionLocal() as db:
+        order = db.scalar(select(Order).options(selectinload(Order.items)).where(Order.id == order_id))
+        if order is None:
+            error_code, permanent = "order_missing", True
+        else:
+            # A duplicate (409) surfaces as a successful submission, not an error.
+            try:
+                with SpaceSellerClient(settings) as client:
+                    submission = client.push_lead(order)
+                space_seller_id = submission.space_seller_id
+            except SpaceSellerError as error:
+                error_code, permanent = error.code, error.permanent
+
+    with SessionLocal() as db:
+        row = db.get(SpaceSellerOutbox, row_id)
+        if row:
+            row.state = next_state(row.attempts, succeeded=error_code is None, permanent=permanent)
+            row.last_error_code = store_error_code(error_code)
+            if row.state == "delivered":
+                row.delivered_at = datetime.now(timezone.utc)
+                row.space_seller_id = space_seller_id
+            db.commit()
+    return error_code is None
+
+
 async def run() -> None:
     while True:
-        for task in (finalize_expired_orders, deliver_one_sheet, deliver_one_tracking):
+        for task in (finalize_expired_orders, deliver_one_sheet, deliver_one_tracking, deliver_one_spaceseller):
             try:
                 await asyncio.to_thread(task)
             except Exception as error:  # keep the loop alive; never log row data
